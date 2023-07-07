@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+
+  
+<!-- Loading CSS -->
+<style>
+  .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: 1s all;
+      opacity: 0;
+  }
+  .loading.show {
+      opacity: 1;
+  }
+  .loading .spin {
+      border: 3px solid hsla(185, 100%, 62%, 0.2);
+      border-top-color: #088a6b;
+      border-radius: 50%;
+      width: 3em;
+      height: 3em;
+      animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }            
+</style>
+
+<!-- Loading HTML -->
+<div class="loading show">
+  <div class="spin"></div>
+</div>
+
+<!-- Loading Javascript -->
+<script>
+// Loading
+var Loading=(loadingDelayHidden=0)=>{let loading=null;const myLoadingDelayHidden=loadingDelayHidden;let imgs=[];let lenImgs=0;let counterImgsLoading=0;function incrementCounterImgs(){counterImgsLoading+=1;if(counterImgsLoading===lenImgs){hideLoading()}}function hideLoading(){if(loading!==null){loading.classList.remove('show');setTimeout(function(){loading.remove()},myLoadingDelayHidden)}}function init(){document.addEventListener('DOMContentLoaded',function(){loading=document.querySelector('.loading');imgs=Array.from(document.images);lenImgs=imgs.length;if(imgs.length===0){hideLoading()}else{imgs.forEach(function(img){img.addEventListener('load',incrementCounterImgs,false)})}})}return{'init':init}}
+
+Loading(1000).init();
+</script>
+
+
+
+
+  <div id="app">
+    <v-app>
+      <!--Barra superior-->
+      <v-system-bar appp dark class="elevation-4" height="30"
+          dark
+          app
+          window
+          :color="color"
+           > 
+        <h3 class="white--text">Tuxus App - Control Financiero  </h3> 
+        <v-spacer></v-spacer> 
+        <v-btn  href="/logout" icon>
+          <v-icon color="white">mdi-logout</v-icon>
+        </v-btn>
+    </v-system-bar>
+    
+      <div>
+        
+
+        <div v-if="bottomNav=== 0" >
+            
+            <v-col cols="12" md="12" ms="12" class="my-6">
+              
+                <template>
+                    <v-card class="mx-auto rounded-xl elevation-4" max-width="380" outlined color="green" dark>
+                        <v-list-item two-line>
+                            <v-list-item-content>
+                                <v-icon color="white">
+                                    mdi-thumb-up
+                                    mdi-48px
+                                </v-icon>
+                            </v-list-item-content>
+                            <v-list-item-content>
+                                <v-list-item-title class="">
+                                    <template v-if="TotalIngreso > 0 ">
+                                        L. [[ parseFloat(TotalIngreso).toLocaleString('en-US')]]
+                                    </template>
+                                    <template v-else>
+                                        L. 0
+                                    </template>                                 
+                                </v-list-item-title>
+                                <v-list-item-subtitle>Saldo Disponible</v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-card>
+                </template>
+                <v-sheet dark color="green rounded" class="my-1">
+                  <v-sparkline
+                    :value="UltimosIngresos"
+                    color="rgba(255, 255, 255, .7)"
+                    height="100"
+                    padding="24"
+                    stroke-linecap="round"
+                    smooth
+                  >
+                    <template v-slot:label="item">
+                      L. [[ parseFloat(item.value).toLocaleString('en-US') ]]
+                    </template>
+                  </v-sparkline>
+                </v-sheet>
+
+            </v-col>
+
+          
+
+            <v-col cols="12" md="12" ms="12" class=" ">
+                <template>
+                    <v-card class="mx-auto rounded-xl elevation-4" max-width="380" outlined color="red" dark>
+                        <v-list-item two-line>
+                            <v-list-item-content>
+                                <v-icon color="white">
+                                    mdi-thumb-down
+                                    mdi-48px
+                                </v-icon>
+                            </v-list-item-content>
+                            <v-list-item-content>
+                                <v-list-item-title class="headline mb-1 white--text">
+                                    <template v-if="TotalEgresos > 0 ">
+                                        L. [[ parseFloat(TotalEgresos).toLocaleString('en-US') ]]
+                                    </template>
+                                    <template v-else>
+                                        L. 0
+                                    </template>
+                                </v-list-item-title>
+                                <v-list-item-subtitle class="white--text">Egresos</v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-card>
+                </template>
+                <v-sheet dark color="red rounded" class="my-1">
+                  <v-sparkline
+                    :value="UltimosEgresos"
+                    color="rgba(255, 255, 255, .7)"
+                    height="100"
+                    padding="24"
+                    stroke-linecap="round"
+                    smooth
+                  >
+                    <template v-slot:label="item">
+                      L. [[ parseFloat(item.value).toLocaleString('en-US') ]]
+                    </template>
+                  </v-sparkline>
+                </v-sheet>
+            </v-col>
+
+              
+
+
+
+         
+        </div>
+
+
+        <!--Registros-->
+        <div v-if="bottomNav=== 1" class="my-7">
+          <v-container fluid>
+            <v-row>
+              
+              <v-col cols="6" >
+                
+                <v-text-field
+                  outlined
+                  dense
+                  v-model="cantidad"
+                  type="number"
+                  label="Cantidad"
+                  color="teal"
+                  prefix="L."
+                 
+                ></v-text-field>
+              </v-col>
+
+
+              <v-col cols="6" >
+                <v-menu v-model="menu1" :close-on-content-click="false" :nudge-right="10" transition="scale-transition"
+                    offset-y min-width="290px">
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-text-field color="teal" v-model="date1" label="Fecha : " outlined dense readonly v-bind="attrs" v-on="on">
+                        </v-text-field >
+                    </template>
+                    <v-date-picker v-model="date1" @input="menu1 = false" color="teal"></v-date-picker>
+                </v-menu>
+
+              </v-col>
+
+              
+              
+
+
+              <v-col cols="6" >
+                <v-select
+                  v-model="Categoria"
+                  :items="Categorias_List"
+                  item-text="nombre"
+                  item-value="id"
+                  outlined
+                  dense
+                  chips
+                  small-chips
+                  label="Categoría"
+                  color="teal"
+                  @focus="($event) => {$event.target.click()}"
+                ></v-select>
+              </v-col>
+
+
+              <v-col cols="6">
+                <v-select
+                  dense
+                  v-model="tipo"
+                  :items="['Ingreso','Egreso','Agendado']"
+                  label="Tipo de Acción"
+                  outlined
+                  color="teal"
+                  @focus="($event) => {$event.target.click()}"
+                ></v-select>
+              </v-col>
+
+
+              <v-col cols="12">
+                <v-textarea
+                outlined
+                v-model="descripcion"
+                name="Descripción"
+                label="Descripción"
+                color="teal"
+              ></v-textarea>
+              </v-col>
+
+
+              <v-col cols="12">
+                <v-btn block color="teal " class="white--text " @click="Save()">
+                  Guardar Registro
+                </v-btn>
+              </v-col>
+              
+
+            </v-row>
+          </v-container>
+        </div>
+
+        <!--Historis-->
+        <div v-if="bottomNav=== 2" class="my-6">
+            <v-card>
+              <v-card-text class="py-0">
+                <v-timeline
+                  align-top
+                  dense
+                 
+                >
+                  <v-timeline-item
+                    v-for="(item, i) in TL"
+                    :key="i"
+                    :color="item.color"
+                    :icon="item.icon"
+                  >
+                    <v-row class="pt-1" v-if="item.categoria != 'Linea' ">
+                      <v-col cols="3">
+                        <strong :class="`${item.color}--text`"> [[ item.fecha | dateF ]] [[ item.date_time_c | timeF ]]</strong>
+                      </v-col>
+                      <v-col cols="9">
+                        <strong :class="`${item.color}--text`" >L.[[ parseFloat(item.cantidad).toLocaleString('en-US') ]] </strong>
+                        <div class="text-caption">
+                          [[ item.categoria ]] - ([[ item.descripcion ]]) 
+                        </div>
+                      </v-col>
+                    </v-row>
+                    <v-row class="pt-1" v-else>
+                      <v-col cols="12">
+                        <h1 class="purple--text">[[ item.descripcion ]]</h1>
+                      </v-col>
+                    </v-row>
+
+
+                  </v-timeline-item>
+                </v-timeline>
+              </v-card-text>
+            </v-card>
+        </div>
+
+        
+
+
+        <!--Calendario-->
+        <div v-if="bottomNav=== 3" class="my-6">
+
+          <template>
+            <v-row class="fill-height">
+              <v-col>
+                <v-sheet height="64" class="elevation-4">
+                  <v-toolbar
+                    flat
+                  >
+                    <v-btn
+                      outlined
+                      class="mr-4"
+                      color="grey darken-2"
+                      @click="setToday"
+                    >
+                      Hoy
+                    </v-btn>
+                    <v-btn
+                      fab
+                      text
+                      small
+                      color="grey darken-2"
+                      @click="prev"
+                    >
+                      <v-icon small>
+                        mdi-chevron-left
+                      </v-icon>
+                    </v-btn>
+                    <v-btn
+                      fab
+                      text
+                      small
+                      color="grey darken-2"
+                      @click="next"
+                    >
+                      <v-icon small>
+                        mdi-chevron-right
+                      </v-icon>
+                    </v-btn>
+                    <v-toolbar-title v-if="$refs.calendar">
+                      [[ $refs.calendar.title ]]
+                    </v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-menu
+                      bottom
+                      right
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          outlined
+                          color="grey darken-2"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <span>[[ typeToLabel[type] ]]</span>
+                          <v-icon right>
+                            mdi-menu-down
+                          </v-icon>
+                        </v-btn>
+                      </template>
+                      <v-list>
+                        <v-list-item @click="type = 'day'">
+                          <v-list-item-title>Dia</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="type = 'week'">
+                          <v-list-item-title>Semana</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="type = 'month'">
+                          <v-list-item-title>Mes</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="type = '4day'">
+                          <v-list-item-title>4 dias</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
+                  </v-toolbar>
+                </v-sheet>
+                <v-sheet height="500">
+                  <v-calendar
+                    class="elevation-4"
+                    ref="calendar"
+                    v-model="focus"
+                    color="primary"
+                    :events="events"
+                    :event-color="getEventColor"
+                    :type="type"
+                    
+                    @click:event="showEvent"
+                    @click:more="viewDay"
+                    @click:date="viewDay"
+                    @change="updateRange"
+                  ></v-calendar>
+                  <v-menu
+                    v-model="selectedOpen"
+                    :close-on-content-click="false"
+                    :activator="selectedElement"
+                    offset-x
+                  >
+                    <v-card
+                      color="grey lighten-4"
+                      min-width="350px"
+                      flat
+                    >
+                      <v-toolbar
+                        :color="selectedEvent.color"
+                        dark
+                      >
+                        <v-btn icon>
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-btn icon>
+                          <v-icon>mdi-heart</v-icon>
+                        </v-btn>
+                        <v-btn icon>
+                          <v-icon>mdi-dots-vertical</v-icon>
+                        </v-btn>
+                      </v-toolbar>
+                      <v-card-text>
+                        <span v-html="selectedEvent.details"></span>
+                      </v-card-text>
+                      <v-card-actions>
+                        <v-btn
+                          text
+                          color="secondary"
+                          @click="selectedOpen = false"
+                        >
+                          Cancel
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-menu>
+                </v-sheet>
+              </v-col>
+            </v-row>
+          </template>
+
+
+        </div>
+        <!--Botonera Infierio pie de pagina-->
+      
+        <template>
+          
+          <v-bottom-navigation window dense app dark v-model="bottomNav"  shift fixed grow :background-color="color">
+          <v-btn>
+              <span>Inicio</span>
+              <v-icon>mdi-bitcoin</v-icon>
+          </v-btn>
+          <v-btn>
+              <span>Registros</span>
+              <v-icon>mdi-draw</v-icon>
+          </v-btn>
+
+         
+          <v-btn>
+              <span>Historial</span>
+              <v-icon>mdi-timeline-alert</v-icon>
+          </v-btn>
+          <v-btn>
+              <span>Calendario</span>
+              <v-icon>mdi-calendar-multiple</v-icon>
+          </v-btn>
+          </v-bottom-navigation>
+      
+      </template>
+      </div>
+    </v-app>
+  </div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://momentjs.com/downloads/moment.js"></script>
+
+  <script>
+    
+      
+    new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#app',
+        vuetify: new Vuetify(),
+        data: {
+            bottomNav:2,
+            TotalIngreso:0,
+            TotalEgresos:0,
+            Last_Ingresos:[],
+            Last_Egresos:[],
+            UltimosIngresos: [],
+            UltimosEgresos: [],
+            TL:[], //Timeline
+
+            Categorias_List:[],
+            Categoria:'',
+            cantidad:null,
+            descripcion:'',
+            tipo:'',
+            date1: new Date().toISOString().substr(0, 10),
+            menu1: false,
+
+            focus: '',
+            type: 'month',
+            typeToLabel: {
+              month: 'Month',
+              week: 'Week',
+              day: 'Day',
+              '4day': '4 Days',
+            },
+            selectedEvent: {},
+            selectedElement: null,
+            selectedOpen: false,
+            events: [],
+            
+
+            
+
+
+        },
+        computed: {
+          color () {
+            switch (this.bottomNav) {
+              case 0: return '#292f36'
+              case 1: return 'teal '
+              case 2: return 'deep-purple '
+              case 3: return 'blue-grey darken-3'
+              default: return '#292f36'
+            }
+          },
+
+          title () {
+            switch (this.bottomNav) {
+              case 0: return 'Inicio'
+              case 1: return 'Registro'
+              case 2: return 'Historial'
+              case 3: return 'Calendario'
+              default: return 'Inicio'
+            }
+          },
+        }, 
+        mounted() {
+            this.dashboard()
+            this.updateRange()
+            //this.$refs.calendar.checkChange()
+        },
+        filters: {
+
+            dateF: function (value) {
+                if (value) {
+                    return moment(String(value)).format('MM/DD')
+                }
+            },
+    
+            timeF: function (value) {
+                
+                if (value) {
+                    return moment(value, "HH:mm:ss").format("HH:MM A");
+                }
+            },
+        },
+        methods: {
+          async Save(){
+            var self=this;
+              await axios.post('/api/v1.1/registro/', {
+                'categoria':self.Categoria,
+                'cantidad':self.cantidad,
+                'fecha':self.date1,
+                'descripcion':self.descripcion,
+                'tipo':self.tipo,
+              })
+              .then(function(res){
+                console.log(res.data)
+              })
+              .catch(function(err){
+                console.log(err)
+              })
+
+              self.Categoria=''
+              self.cantidad=null
+              self.descripcion=''
+              self.tipo=''
+              self.date1= new Date().toISOString().substr(0, 10)
+
+              self.dashboard()
+          },
+
+
+            async dashboard(){
+                var self=this;
+                self.UltimosIngresos = []
+                self.UltimosEgresos = []
+                await axios.get('/api/v1.1/dahsboard')
+                .then(function(res){
+                    console.log(res.data)
+                    self.TotalIngreso = res.data[0].Ingresos
+                    self.TotalEgresos = res.data[0].Egresos
+                    self.Last_Ingresos = res.data[0].Last_Ingesos
+                    self.Last_Egresos = res.data[0].Last_Egresos
+                    self.Categorias_List = res.data[0].Categoria
+
+                    let i = 0
+                    if(self.Last_Ingresos.length == 1){
+                        self.UltimosIngresos.push(0)
+                    }
+                    if(self.Last_Egresos.length == 1){
+                        self.UltimosEgresos.push(0)
+                    }
+                    for(i in self.Last_Ingresos){
+                        self.UltimosIngresos.push(parseFloat(self.Last_Ingresos[i].cantidad))
+                    }
+                    for(i in self.Last_Egresos){
+                        self.UltimosEgresos.push(parseFloat(self.Last_Egresos[i].cantidad))
+                    }
+                    
+                    self.TL = res.data[0].TLF
+                    
+                })
+                .catch(function(err){
+                    console.log(err)
+                })
+
+                //self.updateRange()
+            },
+
+
+
+
+              viewDay ({ date }) {
+                this.focus = date
+                this.type = 'day'
+              },
+              getEventColor (event) {
+                return event.color
+              },
+              setToday () {
+                this.focus = ''
+              },
+              prev () {
+                this.$refs.calendar.prev()
+              },
+              next () {
+                this.$refs.calendar.next()
+              },
+              showEvent ({ nativeEvent, event }) {
+                const open = () => {
+                  this.selectedEvent = event
+                  this.selectedElement = nativeEvent.target
+                  requestAnimationFrame(() => requestAnimationFrame(() => this.selectedOpen = true))
+                }
+        
+                if (this.selectedOpen) {
+                  this.selectedOpen = false
+                  requestAnimationFrame(() => requestAnimationFrame(() => open()))
+                } else {
+                  open()
+                }
+        
+                nativeEvent.stopPropagation()
+              },
+              updateRange () {
+                var self=this;
+                
+                const events = []
+        
+                /*const min = new Date(`${start.date}T00:00:00`)
+                const max = new Date(`${end.date}T23:59:59`)
+                const days = (max.getTime() - min.getTime()) / 86400000
+                const eventCount = this.rnd(days, days + 20)*/
+                
+
+                let i = 0
+                for(i in self.TL){
+                  //console.log(String(self.TL[i].fecha)+ 'T' +String(self.TL[i].date_time_c)+'Z')
+                    fecha = moment(String(String(self.TL[i].fecha)+ 'T' +String(self.TL[i].date_time_c))).format('YYYY-MM-DD HH:mm')
+                    // Sumar 15min 
+                    const horaTexto = String(fecha);
+                    // Crea un objeto Moment a partir del texto
+                    const hora = moment(horaTexto, 'YYYY-MM-DD HH:mm');
+
+                    // Suma 15 minutos a la hora
+                    const horaSumada = hora.add(10, 'minutes');
+
+                    // Obtén la hora sumada en formato de texto
+                    const horaSumadaTexto = horaSumada.format('YYYY-MM-DD HH:mm');
+
+                    if(self.TL[i].categoria != 'Linea'){
+                      events.push({
+                        name: self.TL[i].categoria,
+                        start: fecha,
+                        end: horaSumadaTexto,
+                        details:'L. ' + String(self.TL[i].cantidad) + ' (' +self.TL[i].descripcion +')',
+                        color: self.TL[i].color,
+                        category:self.TL[i].tipo,
+                        //timed: !allDay,
+                      })
+
+                    }
+                }
+                
+                self.events = events
+              },
+              rnd (a, b) {
+                return Math.floor((b - a + 1) * Math.random()) + a
+              },
+
+
+
+
+        },
+    })
+  </script>
+
+</body>
+</html>
